@@ -184,9 +184,6 @@ function renderList(items) {
       </div>
 
       <div class="item-side">
-        <span class="badge ${severityClass}">
-          ${normalizeText(item.classificacao?.severidade).includes("critica") ? "⚠ Crítica" : safe(item.classificacao?.severidade)}
-        </span>
         <span class="chevron">›</span>
       </div>
     `;
@@ -314,10 +311,7 @@ function renderCumminsTroubleshooting(item) {
     return renderLegacyDiagnosticSteps(steps);
   }
 
-  return `
-    ${renderTroubleshootingSummaryTable(steps)}
-    ${renderInteractiveDiagnosticFlow(item, steps)}
-  `;
+  return renderInteractiveDiagnosticFlow(item, steps);
 }
 
 function renderTroubleshootingSummaryTable(steps) {
@@ -365,14 +359,12 @@ function renderInteractiveDiagnosticFlow(item, steps) {
 
   return `
     <section class="interactive-diagnosis-section">
-      <h3 class="section-title">${icon("pulse")} Diagnóstico guiado interativo</h3>
+      <h3 class="section-title">${icon("pulse")} Diagnóstico guiado</h3>
 
-      ${summary ? `
-        <article class="diagnosis-intro-card">
-          <strong>${safe(summary.titulo_passo)}</strong>
-          <p>${safe(summary.reparo_correcao || summary.acao)}</p>
-        </article>
-      ` : ""}
+      <article class="diagnosis-intro-card">
+        <strong>${safe(summary?.titulo_passo || "Roteiro técnico de verificação")}</strong>
+        <p>Siga o roteiro pela esquerda e execute cada verificação conforme o resultado encontrado em campo.</p>
+      </article>
 
       <div class="interactive-diagnosis-grid">
         <aside class="step-index-panel">
@@ -384,7 +376,13 @@ function renderInteractiveDiagnosticFlow(item, steps) {
               onclick="goToDiagnosticStep('${safeAttr(step.id_passo)}')"
             >
               <strong>${safe(step.nivel || step.id_passo)}</strong>
-              <span>${safe(step.titulo_passo)}</span>
+              <span class="step-index-copy">${safe(step.titulo_passo)}</span>
+              ${(step.proximo_passo_sim || step.proximo_passo_nao) ? `
+                <span class="step-index-chips">
+                  ${step.proximo_passo_sim ? `<span class="route-chip yes">SIM: ${safe(step.proximo_passo_sim)}</span>` : ""}
+                  ${step.proximo_passo_nao ? `<span class="route-chip no">NÃO: ${safe(step.proximo_passo_nao)}</span>` : ""}
+                </span>
+              ` : ""}
             </button>
           `).join("")}
         </aside>
