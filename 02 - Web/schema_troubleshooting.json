@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schema - Wolf Troubleshooting de Alertas e Falhas",
+  "type": "object",
+  "required": [
+    "metadata",
+    "configuracao_interface",
+    "listas",
+    "itens"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object"
+    },
+    "configuracao_interface": {
+      "type": "object"
+    },
+    "listas": {
+      "type": "object"
+    },
+    "itens": {
+      "type": "array"
+    }
+  }
+}

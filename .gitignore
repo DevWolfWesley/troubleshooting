@@ -1,0 +1,29 @@
+# Saídas geradas
+99 - Saidas JSON/
+03 - Releases/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes Python
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Temporários
+*.tmp
+*.bak
+~$*.xlsx
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# VS Code local
+.vscode/

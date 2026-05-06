@@ -1,0 +1,384 @@
+{
+  "metadata": {
+    "produto": "Wolf Troubleshooting de Alertas e Falhas",
+    "formato": "dados_troubleshooting",
+    "schema_version": "2.0.0",
+    "modelo_diagnostico": "cummins_like_decision_flow",
+    "versao_base": "0.2.0",
+    "data_referencia_base": "2026-05-04",
+    "data_geracao_json": "2026-05-06T09:59:39",
+    "arquivo_fonte": "C:\\Users\\wesley\\Documents\\13 - TroubleShooting\\01 - DB\\Base_Pai_Troubleshooting_Alertas_Falhas_MVP.xlsx",
+    "chave_correlacao": "codigo",
+    "observacao": "Arquivo JSON gerado a partir da planilha pai. O diagnóstico guiado usa um modelo de árvore de decisão inspirado no padrão Cummins.",
+    "totais": {
+      "itens_troubleshooting": 1,
+      "passos_diagnostico": 10,
+      "anexos": 1,
+      "revisoes": 1
+    },
+    "avisos_validacao": [
+      "Anexo órfão: ANX-0002 referencia código inexistente FST001",
+      "Anexo órfão: ANX-0003 referencia código inexistente FST002",
+      "Anexo órfão: ANX-0004 referencia código inexistente ASP007",
+      "Anexo órfão: ANX-0005 referencia código inexistente ASP008",
+      "Anexo órfão: ANX-0006 referencia código inexistente ASP009",
+      "Anexo órfão: ANX-0007 referencia código inexistente ASP006",
+      "Revisão órfã: referencia código inexistente FST001",
+      "Revisão órfã: referencia código inexistente FST002",
+      "Revisão órfã: referencia código inexistente ASP007",
+      "Revisão órfã: referencia código inexistente ASP008",
+      "Revisão órfã: referencia código inexistente ASP009",
+      "Revisão órfã: referencia código inexistente ASP006"
+    ],
+    "sha256_conteudo": "0b4b84a0812b647b40d17b2b617d22e6adedb395c3029222e2fa11dc9ae689ff"
+  },
+  "configuracao_interface": {
+    "campos_pesquisa": [
+      "codigo",
+      "mensagem_ihm_alerta",
+      "descricao_resumida",
+      "causa",
+      "efeito_maquina_operacao",
+      "solucao",
+      "sistema",
+      "subsistema",
+      "origem",
+      "variavel_codigo_relacionado",
+      "search_text"
+    ],
+    "filtros_principais": [
+      "tipo",
+      "sistema",
+      "severidade",
+      "prioridade",
+      "status",
+      "origem"
+    ],
+    "ordenacao_padrao": [
+      "sistema",
+      "severidade",
+      "codigo"
+    ],
+    "status_publicaveis_sugeridos": [
+      "Homologado",
+      "Publicado"
+    ],
+    "modo_operacao": "offline"
+  },
+  "listas": {
+    "tipo": [
+      "Alerta",
+      "Falha",
+      "Intertravamento",
+      "Informação"
+    ],
+    "sistema": [
+      "Motor",
+      "Hidráulico",
+      "Elétrico",
+      "Compressor",
+      "Coletor de pó",
+      "Água",
+      "Rotação",
+      "Percussão",
+      "Avanço",
+      "Linha",
+      "CAN/J1939",
+      "IHM",
+      "PLC",
+      "Telemetria",
+      "Segurança",
+      "Outro"
+    ],
+    "severidade": [
+      "Informativo",
+      "Baixa",
+      "Média",
+      "Alta",
+      "Crítica"
+    ],
+    "status": [
+      "Rascunho",
+      "Em revisão",
+      "Homologado",
+      "Publicado",
+      "Obsoleto"
+    ],
+    "origem": [
+      "PLC",
+      "IHM",
+      "ECU Motor",
+      "CAN/J1939",
+      "Telemetria",
+      "Sensor físico",
+      "Outro"
+    ],
+    "prioridade": [
+      "P1 - Crítica",
+      "P2 - Alta",
+      "P3 - Média",
+      "P4 - Baixa"
+    ],
+    "categoria_causa": [
+      "Elétrica",
+      "Hidráulica",
+      "Mecânica",
+      "Instrumentação",
+      "Software/Lógica",
+      "Operação",
+      "Comunicação",
+      "Parametrização",
+      "Segurança",
+      "Campo/Aplicação",
+      "Outro"
+    ],
+    "tipo_anexo": [
+      "Imagem",
+      "PDF",
+      "Vídeo",
+      "Diagrama",
+      "Print",
+      "Outro"
+    ]
+  },
+  "itens": [
+    {
+      "id_item": "FST003",
+      "codigo": "FST003",
+      "identificacao": {
+        "codigo": "FST003",
+        "tipo": "Falha",
+        "sistema": "Compressor",
+        "subsistema": "Temperatura / Sistema de arrefecimento e lubrificação",
+        "origem": "Sensor físico/Compressor",
+        "variavel_codigo_relacionado": "GVL_TX.FALHA_TEMP_COMPRESSOR"
+      },
+      "classificacao": {
+        "severidade": "Crítica",
+        "prioridade": "P1 - Crítica",
+        "status": "Publicado"
+      },
+      "conteudo": {
+        "mensagem_ihm_alerta": "Alta temperatura compressor",
+        "descricao_resumida": "Falha gerada quando a temperatura do compressor ultrapassa o limite permitido de operação.",
+        "causa": "Temperatura do compressor acima de 115 °C. A causa raiz deve ser confirmada no diagnóstico guiado: falha de arrefecimento, restrição no radiador/colmeia, ventilador/hélice sem desempenho, nível/condição de óleo inadequado, admissão restringida, filtro separador saturado, sensor/chicote com falha ou condição severa de operação.",
+        "efeito_maquina_operacao": "Proteção da máquina por alta temperatura. Desligamento automático para evitar dano ao compressor.",
+        "solucao": "Executar o diagnóstico guiado FST003 e corrigir a causa raiz encontrada. Não tratar esta falha como uma única ação de troca. As ações possíveis incluem limpar o radiador/colmeia, corrigir hélice/acionamento hidráulico, normalizar nível e condição do óleo, corrigir sensor/chicote, remover restrições de admissão, substituir filtro separador/filtro de retorno/óleo quando aplicável e validar a temperatura em operação.",
+        "validacao_apos_solucao": "Após o reparo, limpar/resetar a falha, operar a máquina em condição controlada, monitorar a temperatura do compressor na IHM/PLC/telemetria e confirmar que a temperatura permanece abaixo do limite de disparo e que a falha não retorna.",
+        "ferramentas_necessarias": "IHM, PLC/CODESYS, telemetria, termômetro infravermelho, tacômetro, multímetro, kit de ferramentas, ferramentas de limpeza e EPI.",
+        "observacoes": "Conceito revisado: a aba principal contém causa provável geral, efeito e solução macro. A análise detalhada deve ficar na aba 02_Diagnostico_Guiado, em formato de árvore de decisão semelhante ao padrão Cummins."
+      },
+      "controle": {
+        "responsavel": "Engenharia",
+        "data_revisao": "2026-05-04",
+        "versao": "0.2.0"
+      },
+      "diagnostico_guiado": [
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P0",
+          "ordem": 0,
+          "nivel": "Resumo",
+          "titulo_passo": "Resumo da solução de problemas",
+          "condicoes": "Falha ativa ou registrada na IHM/PLC/telemetria.",
+          "acao": "Seguir a sequência de diagnóstico antes de substituir componentes.",
+          "especificacao_pergunta": "A falha FST003 está relacionada à temperatura do compressor acima de 115 °C?",
+          "se_sim_ok": "Iniciar pelo PASSO 1.",
+          "se_nao_nok": "Verificar se o código/variável selecionado está correto.",
+          "proximo_passo_sim": "FST003-P1",
+          "proximo_passo_nao": "Revisar código da falha",
+          "reparo_correcao": "Usar esta tabela como roteiro de diagnóstico. A solução final depende da causa raiz encontrada.",
+          "ferramentas": "IHM / PLC / Telemetria",
+          "seguranca": "Não operar a máquina continuamente com falha crítica ativa.",
+          "observacoes": "Linha de resumo equivalente ao 'Resumo da Solução de Problemas' do manual Cummins."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P1",
+          "ordem": 0,
+          "nivel": "Passo 1",
+          "titulo_passo": "Confirmar falha e condição real de temperatura",
+          "condicoes": "Máquina em local seguro, operador informado, falha visível na IHM ou histórico disponível.",
+          "acao": "Confirmar a falha na IHM e na variável GVL_TX.FALHA_TEMP_COMPRESSOR. Comparar a leitura/condição com medição externa quando possível.",
+          "especificacao_pergunta": "A temperatura real do compressor está acima de 115 °C ou a tendência de temperatura confirma sobreaquecimento?",
+          "se_sim_ok": "Prosseguir para inspeção do sistema de arrefecimento.",
+          "se_nao_nok": "Investigar sensor, chicote, alimentação/sinal e leitura no PLC antes de atuar mecanicamente.",
+          "proximo_passo_sim": "FST003-P2",
+          "proximo_passo_nao": "FST003-P1A",
+          "reparo_correcao": "Se a leitura for incoerente, corrigir sensor/chicote/entrada antes de liberar a máquina.",
+          "ferramentas": "IHM, PLC/CODESYS, telemetria, termômetro infravermelho, multímetro.",
+          "seguranca": "Evitar contato com partes quentes. Usar EPI.",
+          "observacoes": "Este passo separa falha real de temperatura de falha elétrica/instrumentação."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P1A",
+          "ordem": 0,
+          "nivel": "Passo 1A",
+          "titulo_passo": "Verificar sensor de temperatura e chicote",
+          "condicoes": "Chave desligada para inspeção elétrica; sistema seguro.",
+          "acao": "Inspecionar conector, chicote, fixação, oxidação, umidade, danos mecânicos e continuidade elétrica do sensor de temperatura do compressor.",
+          "especificacao_pergunta": "Há conector solto, chicote danificado, mau contato, umidade, oxidação ou leitura elétrica incoerente?",
+          "se_sim_ok": "Corrigir conexão/chicote/sensor e validar novamente.",
+          "se_nao_nok": "Prosseguir para diagnóstico térmico/mecânico.",
+          "proximo_passo_sim": "FST003-P6",
+          "proximo_passo_nao": "FST003-P2",
+          "reparo_correcao": "Reparar chicote/conector ou substituir sensor somente se confirmado defeito.",
+          "ferramentas": "Multímetro, ferramentas elétricas, IHM/PLC.",
+          "seguranca": "Desenergizar circuito antes de manipular conectores.",
+          "observacoes": "Equivalente conceitual aos passos Cummins de inspeção de sensor, pinos e circuito."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P2",
+          "ordem": 0,
+          "nivel": "Passo 2",
+          "titulo_passo": "Verificar ventilação e arrefecimento do compressor",
+          "condicoes": "Motor em condição segura para teste, área sem pessoas próximas à hélice.",
+          "acao": "Verificar funcionamento da hélice do radiador, sentido de giro, ruído, integridade das pás, rolamentos/flange e rotação.",
+          "especificacao_pergunta": "A hélice está operando corretamente, sem danos/ruídos e com rotação adequada?",
+          "se_sim_ok": "Prosseguir para inspeção do radiador/colmeia.",
+          "se_nao_nok": "Corrigir sistema de acionamento da hélice.",
+          "proximo_passo_sim": "FST003-P3",
+          "proximo_passo_nao": "FST003-P2A",
+          "reparo_correcao": "Reparar hélice, flange, rolamento, eixo, motor hidráulico ou alimentação hidráulica conforme causa identificada.",
+          "ferramentas": "Tacômetro, inspeção visual, kit de ferramentas, EPI.",
+          "seguranca": "Manter distância de partes girantes. Não inserir mãos ou ferramentas com hélice em movimento.",
+          "observacoes": "Referência operacional: hélice parada, rotação insuficiente, pá danificada e ruído de rolamento indicam falha de arrefecimento."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P2A",
+          "ordem": 0,
+          "nivel": "Passo 2A",
+          "titulo_passo": "Verificar acionamento hidráulico da hélice",
+          "condicoes": "Sistema hidráulico em condição segura para medição.",
+          "acao": "Verificar vazamento de óleo no motor da hélice e pressão da bomba menor/linha de acionamento do motor da hélice.",
+          "especificacao_pergunta": "Há vazamento, pressão insuficiente ou falha no acionamento do motor da hélice?",
+          "se_sim_ok": "Corrigir vazamento/pressão/acionamento e validar.",
+          "se_nao_nok": "Prosseguir para limpeza e avaliação do radiador.",
+          "proximo_passo_sim": "FST003-P6",
+          "proximo_passo_nao": "FST003-P3",
+          "reparo_correcao": "Reparar vazamentos, mangueiras, conexões, motor hidráulico, bomba ou ajuste hidráulico conforme análise.",
+          "ferramentas": "Manômetro, kit hidráulico, ferramentas, EPI.",
+          "seguranca": "Despressurizar circuitos antes de intervir. Cuidado com óleo quente.",
+          "observacoes": "Este passo detalha a suspeita de hélice com rotação insuficiente por falha hidráulica."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P3",
+          "ordem": 0,
+          "nivel": "Passo 3",
+          "titulo_passo": "Inspecionar e limpar radiador/colmeia",
+          "condicoes": "Máquina desligada e radiador acessível com segurança.",
+          "acao": "Inspecionar obstrução por poeira, lama ou detritos. Limpar radiador/colmeia. Após limpeza, medir temperatura da colmeia com termômetro infravermelho em padrão zig-zag de baixo para cima.",
+          "especificacao_pergunta": "O radiador/colmeia estava obstruído ou apresenta distribuição térmica anormal?",
+          "se_sim_ok": "Realizar limpeza/correção da falha e validar temperatura.",
+          "se_nao_nok": "Prosseguir para nível/condição do óleo do compressor.",
+          "proximo_passo_sim": "FST003-P6",
+          "proximo_passo_nao": "FST003-P4",
+          "reparo_correcao": "Limpar radiador/colmeia e corrigir obstruções de fluxo de ar.",
+          "ferramentas": "Ferramentas de limpeza, ar comprimido/água conforme procedimento, termômetro infravermelho, EPI.",
+          "seguranca": "Cuidado com jatos de ar/água e superfícies quentes.",
+          "observacoes": "A medição em zig-zag ajuda a identificar regiões obstruídas ou sem troca térmica."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P4",
+          "ordem": 0,
+          "nivel": "Passo 4",
+          "titulo_passo": "Verificar nível e condição do óleo do compressor",
+          "condicoes": "Máquina em condição segura para inspeção do tanque separador.",
+          "acao": "Verificar nível de óleo no visor do tanque separador, condição visual do óleo e evidências de contaminação/saturação.",
+          "especificacao_pergunta": "O nível/condição do óleo está fora do especificado ou há indício de contaminação/saturação?",
+          "se_sim_ok": "Corrigir nível/óleo/filtros e validar.",
+          "se_nao_nok": "Prosseguir para admissão de ar da unidade compressora.",
+          "proximo_passo_sim": "FST003-P6",
+          "proximo_passo_nao": "FST003-P5",
+          "reparo_correcao": "Normalizar nível de óleo, trocar óleo da unidade compressora e filtro de retorno quando aplicável.",
+          "ferramentas": "Kit de ferramentas, óleo especificado, filtro de retorno, EPI.",
+          "seguranca": "Cuidado com óleo quente e pressão residual no reservatório.",
+          "observacoes": "Nível incorreto ou óleo degradado reduz eficiência térmica e pode elevar temperatura."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P5",
+          "ordem": 0,
+          "nivel": "Passo 5",
+          "titulo_passo": "Verificar admissão de ar e filtro separador",
+          "condicoes": "Unidade compressora parada e segura para inspeção.",
+          "acao": "Inspecionar filtro de admissão de ar, tubulação de admissão, válvula gaveta com presença de pó e filtro separador no reservatório de ar.",
+          "especificacao_pergunta": "Há filtro/tubulação/valvula obstruída ou filtro separador saturado?",
+          "se_sim_ok": "Corrigir restrição e validar operação.",
+          "se_nao_nok": "Prosseguir para inspeção interna/especializada da unidade compressora.",
+          "proximo_passo_sim": "FST003-P6",
+          "proximo_passo_nao": "FST003-P5A",
+          "reparo_correcao": "Trocar filtro de admissão, limpar tubulação/válvula, substituir filtro separador se saturado.",
+          "ferramentas": "Kit de ferramentas, filtros, EPI.",
+          "seguranca": "Aliviar pressão antes de abrir reservatório de ar.",
+          "observacoes": "Este passo consolida as verificações de admissão e saturação do separador."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P5A",
+          "ordem": 0,
+          "nivel": "Passo 5A",
+          "titulo_passo": "Verificar integridade da unidade compressora",
+          "condicoes": "Somente executar após eliminar causas externas de arrefecimento, óleo, admissão e sensor.",
+          "acao": "Avaliar integridade dos fusos da unidade compressora e sinais de dano interno, travamento, ruído anormal ou aquecimento localizado.",
+          "especificacao_pergunta": "Há indício de dano interno na unidade compressora?",
+          "se_sim_ok": "Encaminhar para manutenção especializada/Departamento Tecnico.",
+          "se_nao_nok": "Executar validação final e monitoramento.",
+          "proximo_passo_sim": "Manutenção especializada",
+          "proximo_passo_nao": "FST003-P6",
+          "reparo_correcao": "Não liberar máquina até análise especializada quando houver suspeita de dano interno.",
+          "ferramentas": "Inspeção técnica especializada, ferramentas conforme procedimento do compressor.",
+          "seguranca": "Bloquear partida acidental. Seguir procedimento específico do fabricante.",
+          "observacoes": "Este é um passo de escalonamento, não uma ação inicial."
+        },
+        {
+          "codigo_item": "FST003",
+          "id_passo": "FST003-P6",
+          "ordem": 0,
+          "nivel": "Passo 6",
+          "titulo_passo": "Validação final após reparo",
+          "condicoes": "Reparo concluído e máquina em condição segura para teste.",
+          "acao": "Limpar/resetar a falha, operar em condição controlada, monitorar temperatura do compressor e confirmar ausência de recorrência.",
+          "especificacao_pergunta": "A falha permanece inativa e a temperatura fica abaixo do limite durante o teste?",
+          "se_sim_ok": "Reparo concluído. Registrar evidências e liberar máquina.",
+          "se_nao_nok": "Retornar ao passo compatível com o sintoma observado ou escalar para Departamento Tecnico.",
+          "proximo_passo_sim": "Concluir",
+          "proximo_passo_nao": "Reavaliar",
+          "reparo_correcao": "Registrar temperatura, tempo de teste, ação executada e evidência da correção.",
+          "ferramentas": "IHM, PLC, telemetria, termômetro infravermelho.",
+          "seguranca": "Manter supervisão durante teste operacional.",
+          "observacoes": "Critério de encerramento do chamado."
+        }
+      ],
+      "anexos": [
+        {
+          "id_anexo": "ANX-0001",
+          "codigo_item": "FST003",
+          "tipo": "Imagem",
+          "titulo": "Localização do sensor de Temperatura do compressor.",
+          "arquivo_caminho_relativo": "imagens/compressor/sensor_temp_compressor.jpg",
+          "descricao": "Documento de referência para inspeção do Sensor de temperatura do compressor.",
+          "ordem": 1,
+          "observacoes": "Exemplo"
+        }
+      ],
+      "revisoes": [
+        {
+          "versao": "0.1.1",
+          "data": "2026-05-04",
+          "responsavel": "Engenharia",
+          "tipo_alteracao": "Diagnóstico guiado",
+          "descricao": "Inclusão dos passos de diagnóstico guiado para o item FST003 - Alta temperatura compressor.",
+          "itens_alterados": "FST003",
+          "status_publicacao": "Em revisão"
+        }
+      ],
+      "search_text": "FST003 | FST003 | FST003 | Falha | Compressor | Temperatura / Sistema de arrefecimento e lubrificação | Sensor físico/Compressor | GVL_TX.FALHA_TEMP_COMPRESSOR | Crítica | P1 - Crítica | Publicado | Alta temperatura compressor | Falha gerada quando a temperatura do compressor ultrapassa o limite permitido de operação. | Temperatura do compressor acima de 115 °C. A causa raiz deve ser confirmada no diagnóstico guiado: falha de arrefecimento, restrição no radiador/colmeia, ventilador/hélice sem desempenho, nível/condição de óleo inadequado, admissão restringida, filtro separador saturado, sensor/chicote com falha ou condição severa de operação. | Proteção da máquina por alta temperatura. Desligamento automático para evitar dano ao compressor. | Executar o diagnóstico guiado FST003 e corrigir a causa raiz encontrada. Não tratar esta falha como uma única ação de troca. As ações possíveis incluem limpar o radiador/colmeia, corrigir hélice/acionamento hidráulico, normalizar nível e condição do óleo, corrigir sensor/chicote, remover restrições de admissão, substituir filtro separador/filtro de retorno/óleo quando aplicável e validar a temperatura em operação. | Após o reparo, limpar/resetar a falha, operar a máquina em condição controlada, monitorar a temperatura do compressor na IHM/PLC/telemetria e confirmar que a temperatura permanece abaixo do limite de disparo e que a falha não retorna. | IHM, PLC/CODESYS, telemetria, termômetro infravermelho, tacômetro, multímetro, kit de ferramentas, ferramentas de limpeza e EPI. | Conceito revisado: a aba principal contém causa provável geral, efeito e solução macro. A análise detalhada deve ficar na aba 02_Diagnostico_Guiado, em formato de árvore de decisão semelhante ao padrão Cummins. | Engenharia | 2026-05-04 | 0.2.0 | FST003 | FST003-P0 | 0 | Resumo | Resumo da solução de problemas | Falha ativa ou registrada na IHM/PLC/telemetria. | Seguir a sequência de diagnóstico antes de substituir componentes. | A falha FST003 está relacionada à temperatura do compressor acima de 115 °C? | Iniciar pelo PASSO 1. | Verificar se o código/variável selecionado está correto. | FST003-P1 | Revisar código da falha | Usar esta tabela como roteiro de diagnóstico. A solução final depende da causa raiz encontrada. | IHM / PLC / Telemetria | Não operar a máquina continuamente com falha crítica ativa. | Linha de resumo equivalente ao 'Resumo da Solução de Problemas' do manual Cummins. | FST003 | FST003-P1 | 0 | Passo 1 | Confirmar falha e condição real de temperatura | Máquina em local seguro, operador informado, falha visível na IHM ou histórico disponível. | Confirmar a falha na IHM e na variável GVL_TX.FALHA_TEMP_COMPRESSOR. Comparar a leitura/condição com medição externa quando possível. | A temperatura real do compressor está acima de 115 °C ou a tendência de temperatura confirma sobreaquecimento? | Prosseguir para inspeção do sistema de arrefecimento. | Investigar sensor, chicote, alimentação/sinal e leitura no PLC antes de atuar mecanicamente. | FST003-P2 | FST003-P1A | Se a leitura for incoerente, corrigir sensor/chicote/entrada antes de liberar a máquina. | IHM, PLC/CODESYS, telemetria, termômetro infravermelho, multímetro. | Evitar contato com partes quentes. Usar EPI. | Este passo separa falha real de temperatura de falha elétrica/instrumentação. | FST003 | FST003-P1A | 0 | Passo 1A | Verificar sensor de temperatura e chicote | Chave desligada para inspeção elétrica; sistema seguro. | Inspecionar conector, chicote, fixação, oxidação, umidade, danos mecânicos e continuidade elétrica do sensor de temperatura do compressor. | Há conector solto, chicote danificado, mau contato, umidade, oxidação ou leitura elétrica incoerente? | Corrigir conexão/chicote/sensor e validar novamente. | Prosseguir para diagnóstico térmico/mecânico. | FST003-P6 | FST003-P2 | Reparar chicote/conector ou substituir sensor somente se confirmado defeito. | Multímetro, ferramentas elétricas, IHM/PLC. | Desenergizar circuito antes de manipular conectores. | Equivalente conceitual aos passos Cummins de inspeção de sensor, pinos e circuito. | FST003 | FST003-P2 | 0 | Passo 2 | Verificar ventilação e arrefecimento do compressor | Motor em condição segura para teste, área sem pessoas próximas à hélice. | Verificar funcionamento da hélice do radiador, sentido de giro, ruído, integridade das pás, rolamentos/flange e rotação. | A hélice está operando corretamente, sem danos/ruídos e com rotação adequada? | Prosseguir para inspeção do radiador/colmeia. | Corrigir sistema de acionamento da hélice. | FST003-P3 | FST003-P2A | Reparar hélice, flange, rolamento, eixo, motor hidráulico ou alimentação hidráulica conforme causa identificada. | Tacômetro, inspeção visual, kit de ferramentas, EPI. | Manter distância de partes girantes. Não inserir mãos ou ferramentas com hélice em movimento. | Referência operacional: hélice parada, rotação insuficiente, pá danificada e ruído de rolamento indicam falha de arrefecimento. | FST003 | FST003-P2A | 0 | Passo 2A | Verificar acionamento hidráulico da hélice | Sistema hidráulico em condição segura para medição. | Verificar vazamento de óleo no motor da hélice e pressão da bomba menor/linha de acionamento do motor da hélice. | Há vazamento, pressão insuficiente ou falha no acionamento do motor da hélice? | Corrigir vazamento/pressão/acionamento e validar. | Prosseguir para limpeza e avaliação do radiador. | FST003-P6 | FST003-P3 | Reparar vazamentos, mangueiras, conexões, motor hidráulico, bomba ou ajuste hidráulico conforme análise. | Manômetro, kit hidráulico, ferramentas, EPI. | Despressurizar circuitos antes de intervir. Cuidado com óleo quente. | Este passo detalha a suspeita de hélice com rotação insuficiente por falha hidráulica. | FST003 | FST003-P3 | 0 | Passo 3 | Inspecionar e limpar radiador/colmeia | Máquina desligada e radiador acessível com segurança. | Inspecionar obstrução por poeira, lama ou detritos. Limpar radiador/colmeia. Após limpeza, medir temperatura da colmeia com termômetro infravermelho em padrão zig-zag de baixo para cima. | O radiador/colmeia estava obstruído ou apresenta distribuição térmica anormal? | Realizar limpeza/correção da falha e validar temperatura. | Prosseguir para nível/condição do óleo do compressor. | FST003-P6 | FST003-P4 | Limpar radiador/colmeia e corrigir obstruções de fluxo de ar. | Ferramentas de limpeza, ar comprimido/água conforme procedimento, termômetro infravermelho, EPI. | Cuidado com jatos de ar/água e superfícies quentes. | A medição em zig-zag ajuda a identificar regiões obstruídas ou sem troca térmica. | FST003 | FST003-P4 | 0 | Passo 4 | Verificar nível e condição do óleo do compressor | Máquina em condição segura para inspeção do tanque separador. | Verificar nível de óleo no visor do tanque separador, condição visual do óleo e evidências de contaminação/saturação. | O nível/condição do óleo está fora do especificado ou há indício de contaminação/saturação? | Corrigir nível/óleo/filtros e validar. | Prosseguir para admissão de ar da unidade compressora. | FST003-P6 | FST003-P5 | Normalizar nível de óleo, trocar óleo da unidade compressora e filtro de retorno quando aplicável. | Kit de ferramentas, óleo especificado, filtro de retorno, EPI. | Cuidado com óleo quente e pressão residual no reservatório. | Nível incorreto ou óleo degradado reduz eficiência térmica e pode elevar temperatura. | FST003 | FST003-P5 | 0 | Passo 5 | Verificar admissão de ar e filtro separador | Unidade compressora parada e segura para inspeção. | Inspecionar filtro de admissão de ar, tubulação de admissão, válvula gaveta com presença de pó e filtro separador no reservatório de ar. | Há filtro/tubulação/valvula obstruída ou filtro separador saturado? | Corrigir restrição e validar operação. | Prosseguir para inspeção interna/especializada da unidade compressora. | FST003-P6 | FST003-P5A | Trocar filtro de admissão, limpar tubulação/válvula, substituir filtro separador se saturado. | Kit de ferramentas, filtros, EPI. | Aliviar pressão antes de abrir reservatório de ar. | Este passo consolida as verificações de admissão e saturação do separador. | FST003 | FST003-P5A | 0 | Passo 5A | Verificar integridade da unidade compressora | Somente executar após eliminar causas externas de arrefecimento, óleo, admissão e sensor. | Avaliar integridade dos fusos da unidade compressora e sinais de dano interno, travamento, ruído anormal ou aquecimento localizado. | Há indício de dano interno na unidade compressora? | Encaminhar para manutenção especializada/Departamento Tecnico. | Executar validação final e monitoramento. | Manutenção especializada | FST003-P6 | Não liberar máquina até análise especializada quando houver suspeita de dano interno. | Inspeção técnica especializada, ferramentas conforme procedimento do compressor. | Bloquear partida acidental. Seguir procedimento específico do fabricante. | Este é um passo de escalonamento, não uma ação inicial. | FST003 | FST003-P6 | 0 | Passo 6 | Validação final após reparo | Reparo concluído e máquina em condição segura para teste. | Limpar/resetar a falha, operar em condição controlada, monitorar temperatura do compressor e confirmar ausência de recorrência. | A falha permanece inativa e a temperatura fica abaixo do limite durante o teste? | Reparo concluído. Registrar evidências e liberar máquina. | Retornar ao passo compatível com o sintoma observado ou escalar para Departamento Tecnico. | Concluir | Reavaliar | Registrar temperatura, tempo de teste, ação executada e evidência da correção. | IHM, PLC, telemetria, termômetro infravermelho. | Manter supervisão durante teste operacional. | Critério de encerramento do chamado. | ANX-0001 | FST003 | Imagem | Localização do sensor de Temperatura do compressor. | imagens/compressor/sensor_temp_compressor.jpg | Documento de referência para inspeção do Sensor de temperatura do compressor. | 1 | Exemplo | 0.1.1 | 2026-05-04 | Engenharia | Diagnóstico guiado | Inclusão dos passos de diagnóstico guiado para o item FST003 - Alta temperatura compressor. | FST003 | Em revisão"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Wolf Troubleshooting</title>
+
+  <link rel="stylesheet" href="./assets/css/style.css" />
+</head>
+
+<body>
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-area">
+        <div class="logo-card">
+          <img
+            src="./assets/img/logo-wolf.png"
+            alt="Wolf Equipamentos"
+            class="wolf-logo"
+            onerror="this.style.display='none'; this.parentElement.classList.add('logo-missing');"
+          />
+          <div class="logo-fallback">
+            <span>WOLF</span>
+          </div>
+        </div>
+
+        <div class="header-divider"></div>
+
+        <div class="title-area">
+          <h1>Troubleshooting de Alertas e Falhas</h1>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <div>
+          <span>Versão da base</span>
+          <strong id="baseVersion">--</strong>
+        </div>
+
+        <div class="status-separator"></div>
+
+        <div>
+          <span>Base</span>
+          <strong id="baseDate">--</strong>
+        </div>
+
+        <div class="status-separator"></div>
+
+        <div class="offline-pill">
+          <span class="database-icon"></span>
+          <strong>Offline</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="toolbar-panel">
+        <div class="search-field">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35m1.35-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"/></svg>
+          </span>
+
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Digite código, falha, causa, variável, sistema..."
+            autocomplete="off"
+          />
+
+          <kbd>/</kbd>
+        </div>
+
+        <div class="filters-grid">
+          <label>
+            <span>Tipo</span>
+            <select id="filterTipo">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sistema</span>
+            <select id="filterSistema">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Severidade</span>
+            <select id="filterSeveridade">
+              <option value="">Todas</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select id="filterStatus">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <button class="clear-button" id="clearFilters" type="button">
+            <span>⟳</span>
+            Limpar filtros
+          </button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="list-panel glass-panel">
+          <div class="panel-heading">
+            <div class="heading-with-icon">
+              <span class="pulse-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+              </span>
+              <div>
+                <h2>Alertas e Falhas</h2>
+                <p id="resultCount">Carregando itens...</p>
+              </div>
+            </div>
+
+            <button class="mini-button" type="button" title="Ordenação atual">
+              <span>≡</span>
+              Mais recentes
+            </button>
+          </div>
+
+          <div id="cardsContainer" class="cards-container"></div>
+        </aside>
+
+        <section class="detail-panel glass-panel">
+          <div id="detailContainer" class="detail-empty">
+            <div class="empty-orb"></div>
+            <h2>Selecione um item</h2>
+            <p>
+              Clique em uma falha ou alerta na lista para visualizar causa,
+              efeito, solução, diagnóstico guiado, anexos e revisões.
+            </p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div>
+        <strong>Wolf Equipamentos</strong>
+        <span>Confiança que move o futuro</span>
+      </div>
+
+      <div class="footer-status">
+        <span><i class="green-dot"></i> BD local</span>
+        <span id="footerIntegrity">100%</span>
+        <span id="footerUpdate">Última atualização: --</span>
+      </div>
+
+      <div class="machine-lineart" aria-hidden="true">
+        <svg viewBox="0 0 280 90">
+          <path d="M20 70h50l20-25h45l22 25h55" />
+          <path d="M70 70a18 18 0 1036 0 18 18 0 00-36 0z" />
+          <path d="M170 70a18 18 0 1036 0 18 18 0 00-36 0z" />
+          <path d="M132 45l40-25h42l36 20" />
+          <path d="M210 20l42-10 12 14-46 16" />
+          <path d="M130 45l-25-20H75" />
+        </svg>
+      </div>
+    </footer>
+  </div>
+
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>

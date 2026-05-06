@@ -1,0 +1,739 @@
+let database = null;
+let allItems = [];
+let selectedCode = null;
+let activeDiagnosticStepId = null;
+
+const elements = {
+  baseVersion: document.getElementById("baseVersion"),
+  baseDate: document.getElementById("baseDate"),
+  footerUpdate: document.getElementById("footerUpdate"),
+  footerIntegrity: document.getElementById("footerIntegrity"),
+  searchInput: document.getElementById("searchInput"),
+  filterTipo: document.getElementById("filterTipo"),
+  filterSistema: document.getElementById("filterSistema"),
+  filterSeveridade: document.getElementById("filterSeveridade"),
+  filterStatus: document.getElementById("filterStatus"),
+  clearFilters: document.getElementById("clearFilters"),
+  cardsContainer: document.getElementById("cardsContainer"),
+  detailContainer: document.getElementById("detailContainer"),
+  resultCount: document.getElementById("resultCount"),
+};
+
+document.addEventListener("DOMContentLoaded", init);
+
+async function init() {
+  try {
+    const response = await fetch("./dados_troubleshooting.json");
+
+    if (!response.ok) {
+      throw new Error("Não foi possível carregar o arquivo dados_troubleshooting.json.");
+    }
+
+    database = await response.json();
+    allItems = database.itens || [];
+
+    renderMetadata();
+    populateFilters();
+    bindEvents();
+    renderList(allItems);
+
+    if (allItems.length > 0) {
+      selectItem(allItems[0].codigo);
+    }
+  } catch (error) {
+    showLoadError(error);
+  }
+}
+
+function renderMetadata() {
+  const metadata = database.metadata || {};
+  const version = metadata.versao_base || "N/D";
+  const baseDate = metadata.data_referencia_base || "";
+  const generatedAt = metadata.data_geracao_json || "";
+
+  elements.baseVersion.textContent = version;
+  elements.baseDate.textContent = baseDate ? formatDateShort(baseDate) : "--";
+  elements.footerUpdate.textContent = generatedAt
+    ? `Última atualização: ${formatDateTime(generatedAt)}`
+    : "Última atualização: --";
+
+  elements.footerIntegrity.textContent = metadata.avisos_validacao?.length
+    ? "Validar avisos"
+    : "100%";
+}
+
+function populateFilters() {
+  const listas = database.listas || {};
+
+  fillSelect(elements.filterTipo, listas.tipo || []);
+  fillSelect(elements.filterSistema, listas.sistema || []);
+  fillSelect(elements.filterSeveridade, listas.severidade || []);
+  fillSelect(elements.filterStatus, listas.status || []);
+
+  if ([...elements.filterStatus.options].some((opt) => opt.value === "Publicado")) {
+    elements.filterStatus.value = "Publicado";
+  }
+}
+
+function fillSelect(select, values) {
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+}
+
+function bindEvents() {
+  elements.searchInput.addEventListener("input", applyFilters);
+  elements.filterTipo.addEventListener("change", applyFilters);
+  elements.filterSistema.addEventListener("change", applyFilters);
+  elements.filterSeveridade.addEventListener("change", applyFilters);
+  elements.filterStatus.addEventListener("change", applyFilters);
+
+  elements.clearFilters.addEventListener("click", () => {
+    elements.searchInput.value = "";
+    elements.filterTipo.value = "";
+    elements.filterSistema.value = "";
+    elements.filterSeveridade.value = "";
+    elements.filterStatus.value = "";
+    applyFilters();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "/" && document.activeElement !== elements.searchInput) {
+      event.preventDefault();
+      elements.searchInput.focus();
+    }
+  });
+}
+
+function applyFilters() {
+  const filtered = getCurrentFilteredItems();
+  renderList(filtered);
+
+  if (!filtered.some((item) => item.codigo === selectedCode)) {
+    if (filtered.length > 0) {
+      selectItem(filtered[0].codigo);
+    } else {
+      renderEmptyDetail();
+    }
+  }
+}
+
+function getCurrentFilteredItems() {
+  const term = normalizeText(elements.searchInput.value);
+  const tipo = elements.filterTipo.value;
+  const sistema = elements.filterSistema.value;
+  const severidade = elements.filterSeveridade.value;
+  const status = elements.filterStatus.value;
+
+  return allItems.filter((item) => {
+    const matchesText = !term || normalizeText(item.search_text || "").includes(term);
+    const matchesTipo = !tipo || item.identificacao?.tipo === tipo;
+    const matchesSistema = !sistema || item.identificacao?.sistema === sistema;
+    const matchesSeveridade = !severidade || item.classificacao?.severidade === severidade;
+    const matchesStatus = !status || item.classificacao?.status === status;
+
+    return matchesText && matchesTipo && matchesSistema && matchesSeveridade && matchesStatus;
+  });
+}
+
+function renderList(items) {
+  elements.cardsContainer.innerHTML = "";
+  elements.resultCount.textContent = `${items.length} item(ns) encontrado(s)`;
+
+  if (items.length === 0) {
+    elements.cardsContainer.innerHTML = `
+      <article class="item-card">
+        <div class="item-icon alert">${icon("search")}</div>
+        <div class="item-body">
+          <div class="item-code">Sem resultados</div>
+          <div class="item-title">Nenhum item encontrado</div>
+          <div class="card-meta">
+            <span class="badge warning">Ajuste os filtros</span>
+          </div>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
+  items.forEach((item) => {
+    const card = document.createElement("article");
+    const isAlert = normalizeText(item.identificacao?.tipo).includes("alerta");
+    const severityClass = getSeverityClass(item.classificacao?.severidade);
+
+    card.className = `item-card ${item.codigo === selectedCode ? "active" : ""}`;
+    card.addEventListener("click", () => selectItem(item.codigo));
+
+    card.innerHTML = `
+      <div class="item-icon ${isAlert ? "alert" : ""}">
+        ${icon(isAlert ? "sensor" : "thermometer")}
+      </div>
+
+      <div class="item-body">
+        <div class="item-code">${safe(item.codigo)}</div>
+        <div class="item-title">${safe(item.conteudo?.mensagem_ihm_alerta)}</div>
+
+        <div class="card-meta">
+          <span class="badge info">${safe(item.identificacao?.tipo)}</span>
+          <span class="badge">${safe(item.identificacao?.sistema)}</span>
+          <span class="badge ${severityClass}">${safe(item.classificacao?.severidade)}</span>
+        </div>
+      </div>
+
+      <div class="item-side">
+        <span class="badge ${severityClass}">
+          ${normalizeText(item.classificacao?.severidade).includes("critica") ? "⚠ Crítica" : safe(item.classificacao?.severidade)}
+        </span>
+        <span class="chevron">›</span>
+      </div>
+    `;
+
+    elements.cardsContainer.appendChild(card);
+  });
+}
+
+function selectItem(code) {
+  selectedCode = code;
+  const item = allItems.find((entry) => entry.codigo === code);
+
+  if (!item) {
+    renderEmptyDetail();
+    return;
+  }
+
+  const steps = getNormalizedSteps(item);
+  const firstActionStep = steps.find((step) => !isSummaryStep(step)) || steps[0];
+  activeDiagnosticStepId = firstActionStep?.id_passo || null;
+
+  renderList(getCurrentFilteredItems());
+  renderDetail(item);
+}
+
+function renderDetail(item) {
+  const isAlert = normalizeText(item.identificacao?.tipo).includes("alerta");
+  const severityClass = getSeverityClass(item.classificacao?.severidade);
+
+  elements.detailContainer.className = "";
+
+  elements.detailContainer.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-main-icon ${isAlert ? "alert" : ""}">
+        ${icon(isAlert ? "sensor" : "thermometer")}
+      </div>
+
+      <div class="detail-title">
+        <div class="detail-tags">
+          <span class="badge info">${safe(item.identificacao?.tipo)}</span>
+          <span class="badge">${safe(item.identificacao?.sistema)}</span>
+          <span class="badge ${severityClass}">${safe(item.classificacao?.severidade)}</span>
+          <span class="badge">${safe(item.classificacao?.prioridade)}</span>
+        </div>
+
+        <h2>${safe(item.codigo)} — ${safe(item.conteudo?.mensagem_ihm_alerta)}</h2>
+        <p>${safe(item.conteudo?.descricao_resumida)}</p>
+      </div>
+
+      <button class="favorite-button" type="button">☆ Marcar como favorito</button>
+    </div>
+
+    <div class="info-strip">
+      <div class="info-cell">
+        <div class="info-icon">${icon("module")}</div>
+        <div>
+          <span>Subsistema</span>
+          <strong>${safe(item.identificacao?.subsistema)}</strong>
+        </div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-icon purple">${icon("origin")}</div>
+        <div>
+          <span>Origem</span>
+          <strong>${safe(item.identificacao?.origem)}</strong>
+        </div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-icon cyan">${icon("trend")}</div>
+        <div>
+          <span>Variável relacionada</span>
+          <strong>${safe(item.identificacao?.variavel_codigo_relacionado)}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-columns cummins-layout">
+      <div class="detail-left">
+        <div class="ces-grid">
+          <article class="neon-card cause">
+            <span>🔗 Causa provável / condição de disparo</span>
+            <p>${safe(item.conteudo?.causa)}</p>
+          </article>
+
+          <article class="neon-card effect">
+            <span>♙ Efeito na máquina/operação</span>
+            <p>${safe(item.conteudo?.efeito_maquina_operacao)}</p>
+          </article>
+
+          <article class="neon-card solution">
+            <span>🔧 Solução macro</span>
+            <p>${safe(item.conteudo?.solucao)}</p>
+          </article>
+        </div>
+
+        <div class="compact-grid">
+          <article class="compact-card">
+            <span>✓ Critério de validação</span>
+            <p>${safe(item.conteudo?.validacao_apos_solucao)}</p>
+          </article>
+
+          <article class="compact-card">
+            <span>🛠 Ferramentas necessárias</span>
+            <p>${safe(item.conteudo?.ferramentas_necessarias)}</p>
+          </article>
+        </div>
+
+        ${renderCumminsTroubleshooting(item)}
+        ${renderRevisions(item.revisoes || [])}
+      </div>
+
+      ${renderAttachments(item.anexos || [])}
+    </div>
+  `;
+}
+
+function renderCumminsTroubleshooting(item) {
+  const steps = getNormalizedSteps(item);
+
+  if (!steps.length) {
+    return `
+      <section class="diagnostic-section">
+        <h3 class="section-title">${icon("pulse")} Diagnóstico guiado</h3>
+        <p>Nenhum passo de diagnóstico cadastrado para este item.</p>
+      </section>
+    `;
+  }
+
+  const hasCumminsModel = steps.some((step) => step.acao || step.condicoes || step.especificacao_pergunta || step.proximo_passo_sim || step.reparo_correcao);
+
+  if (!hasCumminsModel) {
+    return renderLegacyDiagnosticSteps(steps);
+  }
+
+  return `
+    ${renderTroubleshootingSummaryTable(steps)}
+    ${renderInteractiveDiagnosticFlow(item, steps)}
+  `;
+}
+
+function renderTroubleshootingSummaryTable(steps) {
+  const rows = steps.filter((step) => !isSummaryStep(step));
+
+  return `
+    <section class="cummins-summary-section">
+      <div class="section-title-row">
+        <h3 class="section-title">${icon("table")} Resumo da solução de problemas</h3>
+        <span class="model-pill">Modelo sequencial estilo Cummins</span>
+      </div>
+
+      <div class="summary-table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Passo</th>
+              <th>Ação / teste</th>
+              <th>Especificação / pergunta</th>
+              <th>Próximos passos</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((step) => `
+              <tr onclick="goToDiagnosticStep('${safeAttr(step.id_passo)}')" class="${step.id_passo === activeDiagnosticStepId ? "active-row" : ""}">
+                <td><strong>${safe(step.nivel || step.id_passo)}</strong></td>
+                <td>${safe(step.titulo_passo || step.acao)}</td>
+                <td>${safe(step.especificacao_pergunta)}</td>
+                <td>
+                  <span class="next-chip yes">SIM: ${safe(step.proximo_passo_sim || "--")}</span>
+                  <span class="next-chip no">NÃO: ${safe(step.proximo_passo_nao || "--")}</span>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderInteractiveDiagnosticFlow(item, steps) {
+  const activeStep = steps.find((step) => step.id_passo === activeDiagnosticStepId) || steps.find((step) => !isSummaryStep(step)) || steps[0];
+  const summary = steps.find(isSummaryStep);
+
+  return `
+    <section class="interactive-diagnosis-section">
+      <h3 class="section-title">${icon("pulse")} Diagnóstico guiado interativo</h3>
+
+      ${summary ? `
+        <article class="diagnosis-intro-card">
+          <strong>${safe(summary.titulo_passo)}</strong>
+          <p>${safe(summary.reparo_correcao || summary.acao)}</p>
+        </article>
+      ` : ""}
+
+      <div class="interactive-diagnosis-grid">
+        <aside class="step-index-panel">
+          <span class="index-title">Roteiro</span>
+          ${steps.filter((step) => !isSummaryStep(step)).map((step) => `
+            <button
+              type="button"
+              class="step-index-button ${step.id_passo === activeStep.id_passo ? "active" : ""}"
+              onclick="goToDiagnosticStep('${safeAttr(step.id_passo)}')"
+            >
+              <strong>${safe(step.nivel || step.id_passo)}</strong>
+              <span>${safe(step.titulo_passo)}</span>
+            </button>
+          `).join("")}
+        </aside>
+
+        <article class="step-detail-card">
+          <div class="step-detail-header">
+            <div>
+              <span class="step-kicker">${safe(activeStep.nivel)}</span>
+              <h4>${safe(activeStep.titulo_passo)}</h4>
+            </div>
+            <span class="step-id-large">${safe(activeStep.id_passo)}</span>
+          </div>
+
+          <div class="condition-box">
+            <span>Condições</span>
+            <p>${safe(activeStep.condicoes)}</p>
+          </div>
+
+          <div class="action-spec-grid">
+            <div>
+              <span>Ação</span>
+              <p>${safe(activeStep.acao)}</p>
+            </div>
+            <div>
+              <span>Especificação / pergunta</span>
+              <p>${safe(activeStep.especificacao_pergunta)}</p>
+            </div>
+          </div>
+
+          <div class="decision-grid">
+            <article class="decision-card yes">
+              <span>Se SIM / OK</span>
+              <p>${safe(activeStep.se_sim_ok)}</p>
+              <button type="button" onclick="handleNextStep('${safeAttr(activeStep.proximo_passo_sim)}')">
+                Ir para: ${safe(activeStep.proximo_passo_sim || "concluir")}
+              </button>
+            </article>
+
+            <article class="decision-card no">
+              <span>Se NÃO / NOK</span>
+              <p>${safe(activeStep.se_nao_nok)}</p>
+              <button type="button" onclick="handleNextStep('${safeAttr(activeStep.proximo_passo_nao)}')">
+                Ir para: ${safe(activeStep.proximo_passo_nao || "reavaliar")}
+              </button>
+            </article>
+          </div>
+
+          <div class="repair-card">
+            <span>Reparo / correção</span>
+            <p>${safe(activeStep.reparo_correcao)}</p>
+          </div>
+
+          <div class="support-grid">
+            <div>
+              <span>Ferramentas</span>
+              <p>${safe(activeStep.ferramentas)}</p>
+            </div>
+            <div>
+              <span>Segurança</span>
+              <p>${safe(activeStep.seguranca)}</p>
+            </div>
+            <div>
+              <span>Observações</span>
+              <p>${safe(activeStep.observacoes)}</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+function getNormalizedSteps(item) {
+  const rawSteps = item.diagnostico_guiado || [];
+
+  return rawSteps.map((step, index) => ({
+    codigo_item: step.codigo_item || step.id_falha_alerta || step["Código Item"] || step["ID Falha/Alerta"] || item.codigo,
+    id_passo: step.id_passo || step["ID Passo"] || `PASSO-${index + 1}`,
+    ordem: Number(step.ordem || step["Ordem"] || index + 1),
+    nivel: step.nivel || step["Nível"] || step.ordem || step["Ordem"] || `Passo ${index + 1}`,
+    titulo_passo: step.titulo_passo || step["Título do passo"] || step.pergunta_teste || step["Pergunta/Teste"] || "Passo de diagnóstico",
+    condicoes: step.condicoes || step["Condições"] || "Não informado",
+    acao: step.acao || step["Ação"] || step.pergunta_teste || step["Pergunta/Teste"] || "Não informado",
+    especificacao_pergunta: step.especificacao_pergunta || step["Especificação / Pergunta"] || step.resposta_esperada || step["Resposta esperada"] || "Não informado",
+    se_sim_ok: step.se_sim_ok || step["Se SIM / OK"] || step.se_ok || step["Se OK"] || "Não informado",
+    se_nao_nok: step.se_nao_nok || step["Se NÃO / NOK"] || step.se_nao_ok || step["Se não OK"] || "Não informado",
+    proximo_passo_sim: step.proximo_passo_sim || step["Próximo passo SIM"] || "",
+    proximo_passo_nao: step.proximo_passo_nao || step.proximo_passo_não || step["Próximo passo NÃO"] || "",
+    reparo_correcao: step.reparo_correcao || step["Reparo / Correção"] || "Não informado",
+    ferramentas: step.ferramentas || step["Ferramentas"] || "Não informado",
+    seguranca: step.seguranca || step["Segurança"] || "Não informado",
+    observacoes: step.observacoes || step["Observações"] || "Não informado",
+  })).sort((a, b) => a.ordem - b.ordem);
+}
+
+function isSummaryStep(step) {
+  return normalizeText(step.nivel).includes("resumo") || normalizeText(step.id_passo).includes("-p0");
+}
+
+function goToDiagnosticStep(stepId) {
+  if (!stepId) return;
+
+  const item = allItems.find((entry) => entry.codigo === selectedCode);
+  if (!item) return;
+
+  const steps = getNormalizedSteps(item);
+  const step = steps.find((entry) => normalizeText(entry.id_passo) === normalizeText(stepId));
+
+  if (!step) {
+    showResolutionMessage(stepId);
+    return;
+  }
+
+  activeDiagnosticStepId = step.id_passo;
+  renderDetail(item);
+  const panel = document.querySelector(".interactive-diagnosis-section");
+  panel?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function handleNextStep(nextStep) {
+  const normalized = normalizeText(nextStep);
+
+  if (!nextStep || normalized.includes("concluir") || normalized.includes("reparo concluido")) {
+    showResolutionMessage("Reparo concluído. Registrar evidências e liberar máquina.");
+    return;
+  }
+
+  if (normalized.includes("reavaliar") || normalized.includes("manutencao especializada") || normalized.includes("engenharia")) {
+    showResolutionMessage(nextStep);
+    return;
+  }
+
+  goToDiagnosticStep(nextStep);
+}
+
+function showResolutionMessage(message) {
+  const item = allItems.find((entry) => entry.codigo === selectedCode);
+  if (!item) return;
+
+  const container = document.createElement("div");
+  container.className = "resolution-toast";
+  container.innerHTML = `
+    <strong>Encaminhamento</strong>
+    <p>${safe(message)}</p>
+  `;
+
+  document.body.appendChild(container);
+  setTimeout(() => container.classList.add("show"), 10);
+  setTimeout(() => {
+    container.classList.remove("show");
+    setTimeout(() => container.remove(), 250);
+  }, 4200);
+}
+
+function renderLegacyDiagnosticSteps(steps) {
+  const sorted = [...steps].sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0));
+
+  return `
+    <section class="diagnostic-section">
+      <h3 class="section-title">${icon("pulse")} Diagnóstico guiado</h3>
+      <div class="timeline">
+        ${sorted.map((step) => `
+          <article class="step-card">
+            <div class="step-head">
+              <strong class="step-number">Passo ${safe(step.ordem)}</strong>
+              <span class="step-id">${safe(step.id_passo)}</span>
+            </div>
+            <p><strong>Pergunta/Teste:</strong> ${safe(step.acao)}</p>
+            <p><strong>Resposta esperada:</strong> ${safe(step.especificacao_pergunta)}</p>
+            <p><strong>Se OK:</strong> ${safe(step.se_sim_ok)}</p>
+            <p><strong>Se não OK:</strong> ${safe(step.se_nao_nok)}</p>
+            <p><strong>Ferramentas:</strong> ${safe(step.ferramentas)}</p>
+            <p><strong>Observações:</strong> ${safe(step.observacoes)}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderAttachments(attachments) {
+  if (!attachments.length) {
+    return `
+      <aside class="attachments-panel">
+        <h3 class="section-title">${icon("paperclip")} Anexos e referências</h3>
+        <p>Nenhum anexo cadastrado.</p>
+      </aside>
+    `;
+  }
+
+  return `
+    <aside class="attachments-panel">
+      <h3 class="section-title">${icon("paperclip")} Anexos e referências</h3>
+      <div class="attachments-grid">
+        ${attachments.map(renderAttachmentCard).join("")}
+      </div>
+      <button class="expand-button" type="button">📁 Ver todos os anexos</button>
+    </aside>
+  `;
+}
+
+function renderAttachmentCard(attachment) {
+  const path = attachment.arquivo_caminho_relativo || "";
+  const isImage = /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+
+  return `
+    <article class="attachment-card">
+      <div class="attachment-preview">
+        ${isImage
+          ? `<img src="./${safeAttr(path)}" alt="${safeAttr(attachment.titulo)}" onerror="this.remove(); this.parentElement.insertAdjacentHTML('beforeend', attachmentPlaceholderHtml());" />`
+          : `<div class="attachment-placeholder">${icon("file")}<span>Arquivo preparado</span></div>`}
+      </div>
+      <div class="attachment-body">
+        <strong>${safe(attachment.titulo)}</strong>
+        <small>${safe(attachment.tipo)} • caminho local</small>
+        <a href="./${safeAttr(path)}" target="_blank" rel="noopener">Abrir anexo ↗</a>
+      </div>
+    </article>
+  `;
+}
+
+function attachmentPlaceholderHtml() {
+  return `
+    <div class="attachment-placeholder">
+      ${icon("image")}
+      <span>Imagem não encontrada</span>
+    </div>
+  `;
+}
+
+function renderRevisions(revisions) {
+  if (!revisions.length) {
+    return `
+      <section class="revision-section">
+        <h3 class="section-title">${icon("history")} Revisões</h3>
+        <p>Nenhuma revisão cadastrada.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="revision-section">
+      <h3 class="section-title">${icon("history")} Revisões</h3>
+      ${revisions.map((revision) => `
+        <div class="revision-row">
+          <strong>${safe(revision.versao)} — ${formatDateShort(revision.data)}</strong>
+          <p>${safe(revision.descricao)}</p>
+          <small>Responsável: ${safe(revision.responsavel)} | Status: ${safe(revision.status_publicacao)}</small>
+        </div>
+      `).join("")}
+    </section>
+  `;
+}
+
+function renderEmptyDetail() {
+  selectedCode = null;
+  activeDiagnosticStepId = null;
+  elements.detailContainer.className = "detail-empty";
+  elements.detailContainer.innerHTML = `
+    <div class="empty-orb"></div>
+    <h2>Nenhum item selecionado</h2>
+    <p>Selecione um item da lista para visualizar os detalhes.</p>
+  `;
+}
+
+function showLoadError(error) {
+  elements.cardsContainer.innerHTML = "";
+  elements.resultCount.textContent = "Erro ao carregar base";
+
+  elements.detailContainer.className = "";
+  elements.detailContainer.innerHTML = `
+    <div class="load-error">
+      <h2>Erro ao carregar dados</h2>
+      <p>${safe(error.message)}</p>
+      <p>Verifique se o arquivo <strong>dados_troubleshooting.json</strong> está na mesma pasta do index.html.</p>
+    </div>
+  `;
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function safe(value) {
+  if (value === null || value === undefined || value === "") {
+    return "Não informado";
+  }
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function safeAttr(value) {
+  return safe(value).replaceAll("`", "");
+}
+
+function formatDateShort(value) {
+  if (!value) return "--";
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("pt-BR");
+}
+
+function formatDateTime(value) {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function getSeverityClass(severity) {
+  const normalized = normalizeText(severity);
+  if (normalized.includes("critica")) return "danger";
+  if (normalized.includes("alta")) return "warning";
+  if (normalized.includes("media")) return "warning";
+  return "info";
+}
+
+function icon(name) {
+  const icons = {
+    thermometer: `<svg viewBox="0 0 24 24"><path d="M14 14.76V5a4 4 0 10-8 0v9.76A6 6 0 1014 14.76z"/><path d="M10 5v10"/><path d="M10 19a2 2 0 100-4 2 2 0 000 4z"/></svg>`,
+    sensor: `<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0116 0"/><path d="M7 12a5 5 0 0110 0"/><path d="M10 12a2 2 0 014 0"/><path d="M12 14v5"/><path d="M8 19h8"/></svg>`,
+    search: `<svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35m1.35-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"/></svg>`,
+    module: `<svg viewBox="0 0 24 24"><path d="M7 7h10v10H7z"/><path d="M4 10h3M4 14h3M17 10h3M17 14h3M10 4v3M14 4v3M10 17v3M14 17v3"/></svg>`,
+    origin: `<svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 12l8-5"/><path d="M12 12v9"/><path d="M12 12L4 7"/></svg>`,
+    trend: `<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg>`,
+    pulse: `<svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>`,
+    paperclip: `<svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 115.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>`,
+    file: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>`,
+    image: `<svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 13l2.5-2.5L14 14l2-2 4 4"/><path d="M8.5 8.5h.01"/></svg>`,
+    history: `<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v6h6"/><path d="M12 7v5l3 3"/></svg>`,
+    table: `<svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 5v14M15 5v14"/></svg>`,
+  };
+  return icons[name] || icons.file;
+}
