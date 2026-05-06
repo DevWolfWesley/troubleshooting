@@ -255,14 +255,6 @@ function renderDetail(item) {
           <strong>${safe(item.identificacao?.origem)}</strong>
         </div>
       </div>
-
-      <div class="info-cell">
-        <div class="info-icon cyan">${icon("trend")}</div>
-        <div>
-          <span>Variável relacionada</span>
-          <strong>${safe(item.identificacao?.variavel_codigo_relacionado)}</strong>
-        </div>
-      </div>
     </div>
 
     <div class="content-columns cummins-layout">
@@ -298,9 +290,8 @@ function renderDetail(item) {
 
         ${renderCumminsTroubleshooting(item)}
         ${renderRevisions(item.revisoes || [])}
+        ${renderAttachments(item.anexos || [])}
       </div>
-
-      ${renderAttachments(item.anexos || [])}
     </div>
   `;
 }
