@@ -286,8 +286,8 @@ function renderDetail(item) {
         </div>
 
         ${renderCumminsTroubleshooting(item)}
-        ${renderRevisions(item.revisoes || [])}
         ${renderAttachments(item.anexos || [])}
+        ${renderRevisions(item.revisoes || [])}
       </div>
     </div>
   `;
@@ -314,57 +314,12 @@ function renderCumminsTroubleshooting(item) {
   return renderInteractiveDiagnosticFlow(item, steps);
 }
 
-function renderTroubleshootingSummaryTable(steps) {
-  const rows = steps.filter((step) => !isSummaryStep(step));
-
-  return `
-    <section class="cummins-summary-section">
-      <div class="section-title-row">
-        <h3 class="section-title">${icon("table")} Resumo da solução de problemas</h3>
-        <span class="model-pill">Modelo sequencial estilo Cummins</span>
-      </div>
-
-      <div class="summary-table-wrap">
-        <table class="summary-table">
-          <thead>
-            <tr>
-              <th>Passo</th>
-              <th>Ação / teste</th>
-              <th>Especificação / pergunta</th>
-              <th>Próximos passos</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map((step) => `
-              <tr onclick="goToDiagnosticStep('${safeAttr(step.id_passo)}')" class="${step.id_passo === activeDiagnosticStepId ? "active-row" : ""}">
-                <td><strong>${safe(step.nivel || step.id_passo)}</strong></td>
-                <td>${safe(step.titulo_passo || step.acao)}</td>
-                <td>${safe(step.especificacao_pergunta)}</td>
-                <td>
-                  <span class="next-chip yes">SIM: ${safe(step.proximo_passo_sim || "--")}</span>
-                  <span class="next-chip no">NÃO: ${safe(step.proximo_passo_nao || "--")}</span>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  `;
-}
-
 function renderInteractiveDiagnosticFlow(item, steps) {
   const activeStep = steps.find((step) => step.id_passo === activeDiagnosticStepId) || steps.find((step) => !isSummaryStep(step)) || steps[0];
-  const summary = steps.find(isSummaryStep);
 
   return `
     <section class="interactive-diagnosis-section">
       <h3 class="section-title">${icon("pulse")} Diagnóstico guiado</h3>
-
-      <article class="diagnosis-intro-card">
-        <strong>${safe(summary?.titulo_passo || "Roteiro técnico de verificação")}</strong>
-        <p>Siga o roteiro pela esquerda e execute cada verificação conforme o resultado encontrado em campo.</p>
-      </article>
 
       <div class="interactive-diagnosis-grid">
         <aside class="step-index-panel">
@@ -396,9 +351,16 @@ function renderInteractiveDiagnosticFlow(item, steps) {
             <span class="step-id-large">${safe(activeStep.id_passo)}</span>
           </div>
 
-          <div class="condition-box">
-            <span>Condições</span>
-            <p>${safe(activeStep.condicoes)}</p>
+          <div class="context-safety-grid">
+            <div class="condition-box">
+              <span>Condições</span>
+              <p>${safe(activeStep.condicoes)}</p>
+            </div>
+
+            <div class="safety-box">
+              <span>Segurança</span>
+              <p>${safe(activeStep.seguranca)}</p>
+            </div>
           </div>
 
           <div class="action-spec-grid">
@@ -415,17 +377,19 @@ function renderInteractiveDiagnosticFlow(item, steps) {
           <div class="decision-grid">
             <article class="decision-card yes">
               <span>Se SIM / OK</span>
+              <small class="decision-instruction">Executar antes de avançar</small>
               <p>${safe(activeStep.se_sim_ok)}</p>
               <button type="button" onclick="handleNextStep('${safeAttr(activeStep.proximo_passo_sim)}')">
-                Ir para: ${safe(activeStep.proximo_passo_sim || "concluir")}
+                ${activeStep.proximo_passo_sim ? `Após executar, ir para: ${safe(activeStep.proximo_passo_sim)}` : "Após executar, concluir"}
               </button>
             </article>
 
             <article class="decision-card no">
               <span>Se NÃO / NOK</span>
+              <small class="decision-instruction">Executar antes de avançar</small>
               <p>${safe(activeStep.se_nao_nok)}</p>
               <button type="button" onclick="handleNextStep('${safeAttr(activeStep.proximo_passo_nao)}')">
-                Ir para: ${safe(activeStep.proximo_passo_nao || "reavaliar")}
+                ${activeStep.proximo_passo_nao ? `Após executar, ir para: ${safe(activeStep.proximo_passo_nao)}` : "Após executar, concluir"}
               </button>
             </article>
           </div>
@@ -439,10 +403,6 @@ function renderInteractiveDiagnosticFlow(item, steps) {
             <div>
               <span>Ferramentas</span>
               <p>${safe(activeStep.ferramentas)}</p>
-            </div>
-            <div>
-              <span>Segurança</span>
-              <p>${safe(activeStep.seguranca)}</p>
             </div>
             <div>
               <span>Observações</span>
