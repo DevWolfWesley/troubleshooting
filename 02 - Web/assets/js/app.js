@@ -526,50 +526,53 @@ function renderLegacyDiagnosticSteps(steps) {
 function renderAttachments(attachments) {
   if (!attachments.length) {
     return `
-      <aside class="attachments-panel">
+      <section class="attachments-panel">
         <h3 class="section-title">${icon("paperclip")} Anexos e referências</h3>
         <p>Nenhum anexo cadastrado.</p>
-      </aside>
+      </section>
     `;
   }
 
   return `
-    <aside class="attachments-panel">
+    <section class="attachments-panel">
       <h3 class="section-title">${icon("paperclip")} Anexos e referências</h3>
-      <div class="attachments-grid">
-        ${attachments.map(renderAttachmentCard).join("")}
+      <div class="attachments-table-wrap">
+        <table class="attachments-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Arquivo</th>
+              <th>Abrir</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${attachments.map(renderAttachmentRow).join("")}
+          </tbody>
+        </table>
       </div>
-      <button class="expand-button" type="button">📁 Ver todos os anexos</button>
-    </aside>
+    </section>
   `;
 }
 
-function renderAttachmentCard(attachment) {
+function renderAttachmentRow(attachment) {
   const path = attachment.arquivo_caminho_relativo || "";
-  const isImage = /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+  const href = path ? `./${String(path).replace(/\\/g, "/")}` : "";
+  const description = attachment.descricao || attachment.observacao || attachment.observacoes || "";
 
   return `
-    <article class="attachment-card">
-      <div class="attachment-preview">
-        ${isImage
-          ? `<img src="./${safeAttr(path)}" alt="${safeAttr(attachment.titulo)}" onerror="this.remove(); this.parentElement.insertAdjacentHTML('beforeend', attachmentPlaceholderHtml());" />`
-          : `<div class="attachment-placeholder">${icon("file")}<span>Arquivo preparado</span></div>`}
-      </div>
-      <div class="attachment-body">
-        <strong>${safe(attachment.titulo)}</strong>
-        <small>${safe(attachment.tipo)} • caminho local</small>
-        <a href="./${safeAttr(path)}" target="_blank" rel="noopener">Abrir anexo ↗</a>
-      </div>
-    </article>
-  `;
-}
-
-function attachmentPlaceholderHtml() {
-  return `
-    <div class="attachment-placeholder">
-      ${icon("image")}
-      <span>Imagem não encontrada</span>
-    </div>
+    <tr>
+      <td>${safe(attachment.titulo)}</td>
+      <td>${safe(attachment.tipo)}</td>
+      <td>${safe(description)}</td>
+      <td class="attachment-file-cell" title="${safeAttr(path)}">${safe(path)}</td>
+      <td class="attachment-action-cell">
+        ${href
+          ? `<a href="${safeAttr(href)}" target="_blank" rel="noopener" class="attachment-open-button" title="Abrir anexo" aria-label="Abrir anexo">↗</a>`
+          : `<span class="attachment-open-button disabled" title="Arquivo não informado" aria-label="Arquivo não informado">↗</span>`}
+      </td>
+    </tr>
   `;
 }
 
