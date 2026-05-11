@@ -7,8 +7,6 @@ let recentCodes = [];
 const elements = {
   baseVersion: document.getElementById("baseVersion"),
   baseDate: document.getElementById("baseDate"),
-  footerUpdate: document.getElementById("footerUpdate"),
-  footerIntegrity: document.getElementById("footerIntegrity"),
   searchInput: document.getElementById("searchInput"),
   filterTipo: document.getElementById("filterTipo"),
   filterSistema: document.getElementById("filterSistema"),
@@ -52,17 +50,9 @@ function renderMetadata() {
   const metadata = database.metadata || {};
   const version = metadata.versao_base || "N/D";
   const baseDate = metadata.data_referencia_base || "";
-  const generatedAt = metadata.data_geracao_json || "";
 
   elements.baseVersion.textContent = version;
   elements.baseDate.textContent = baseDate ? formatDateShort(baseDate) : "--";
-  elements.footerUpdate.textContent = generatedAt
-    ? `Última atualização: ${formatDateTime(generatedAt)}`
-    : "Última atualização: --";
-
-  elements.footerIntegrity.textContent = metadata.avisos_validacao?.length
-    ? "Validar avisos"
-    : "100%";
 }
 
 function populateFilters() {

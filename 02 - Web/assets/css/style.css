@@ -1297,21 +1297,25 @@ body::after {
   font-weight: 700;
 }
 
-.footer-status {
+.footer-company-info {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  font-size: 0.86rem;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  max-width: 560px;
+  color: #9fb3d5;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
-.green-dot {
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  border-radius: 999px;
-  margin-right: 7px;
-  background: var(--green);
-  box-shadow: 0 0 12px rgba(52, 245, 163, 0.7);
+.footer-company-info span {
+  overflow-wrap: anywhere;
+}
+
+.footer-company-info span:first-child {
+  color: #d8e6ff;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .machine-lineart {
@@ -1355,6 +1359,21 @@ body::after {
   .toolbar-panel,
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .app-footer {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  }
+
+  .footer-company-info {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: 100%;
+  }
+
+  .machine-lineart {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 
   .list-panel {
@@ -1401,6 +1420,13 @@ body::after {
   .compact-grid,
   .app-footer {
     grid-template-columns: 1fr;
+  }
+
+  .app-footer > div:first-child,
+  .footer-company-info,
+  .machine-lineart {
+    grid-column: auto;
+    grid-row: auto;
   }
 
 }
