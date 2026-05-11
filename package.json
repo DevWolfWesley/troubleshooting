@@ -1,0 +1,18 @@
+{
+  "name": "telemetria-troubleshooting",
+  "version": "0.1.0",
+  "description": "Aplicativo offline de troubleshooting",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "tauri": "tauri"
+  },
+  "keywords": [],
+  "author": "Wolf",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "vite": "^5.0.0"
+  }
+}
