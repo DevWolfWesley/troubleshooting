@@ -96,13 +96,6 @@
             </select>
           </label>
 
-          <label>
-            <span>Status</span>
-            <select id="filterStatus">
-              <option value="">Todos</option>
-            </select>
-          </label>
-
           <button class="clear-button" id="clearFilters" type="button">
             <span>⟳</span>
             Limpar filtros
@@ -124,8 +117,8 @@
             </div>
 
             <button class="mini-button" type="button" title="Ordenação atual">
-              <span>≡</span>
-              Mais recentes
+              <span class="sort-icon">≡</span>
+              <span>Mais recentes</span>
             </button>
           </div>
 
@@ -147,8 +140,8 @@
 
     <footer class="app-footer">
       <div>
-        <strong>Wolf Equipamentos</strong>
-        <span>Confiança que move o futuro</span>
+        <img src="./assets/img/logo-wolf.png" alt="Wolf Equipamentos" class="footer-logo" />
+        <span>Força em cada impacto!</span>
       </div>
 
       <div class="footer-status">
@@ -158,13 +151,51 @@
       </div>
 
       <div class="machine-lineart" aria-hidden="true">
-        <svg viewBox="0 0 280 90">
-          <path d="M20 70h50l20-25h45l22 25h55" />
-          <path d="M70 70a18 18 0 1036 0 18 18 0 00-36 0z" />
-          <path d="M170 70a18 18 0 1036 0 18 18 0 00-36 0z" />
-          <path d="M132 45l40-25h42l36 20" />
-          <path d="M210 20l42-10 12 14-46 16" />
-          <path d="M130 45l-25-20H75" />
+        <svg viewBox="0 0 360 150" role="img">
+          <!-- mastro / torre -->
+          <path d="M54 18v104" />
+          <path d="M44 18h22v14H44z" />
+          <path d="M47 42h14" />
+          <path d="M47 64h14" />
+          <path d="M47 86h14" />
+          <path d="M43 122h24" />
+
+          <!-- martelo / haste -->
+          <path d="M54 122v16" />
+          <path d="M47 138h14" />
+          <path d="M54 138l-5 8" />
+          <path d="M54 138l5 8" />
+
+          <!-- articulação e lança -->
+          <path d="M63 96l42-20" />
+          <path d="M72 104l48-18" />
+          <path d="M105 76l94 18" />
+          <path d="M120 86l76 18" />
+          <path d="M84 92a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+
+          <!-- corpo / cabine -->
+          <path d="M202 62h70l18 18v38H202z" />
+          <path d="M215 72h28v30h-28z" />
+          <path d="M252 72h22l8 10v20h-30z" />
+          <path d="M202 62l14-13h58l-2 13" />
+
+          <!-- tampa traseira / motor -->
+          <path d="M290 78h42v40h-42z" />
+          <path d="M300 88h22" />
+          <path d="M300 98h22" />
+          <path d="M300 108h22" />
+
+          <!-- esteira -->
+          <path d="M178 121h124l18 10-12 12H188l-22-10z" />
+          <path d="M190 132h110" />
+          <path d="M190 132a11 11 0 1 0 22 0a11 11 0 1 0-22 0" />
+          <path d="M278 132a11 11 0 1 0 22 0a11 11 0 1 0-22 0" />
+          <path d="M222 135h38" />
+
+          <!-- detalhes -->
+          <path d="M235 49h12" />
+          <path d="M241 49v-9" />
+          <path d="M310 78l22-12" />
         </svg>
       </div>
     </footer>

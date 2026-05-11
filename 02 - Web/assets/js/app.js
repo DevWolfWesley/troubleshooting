@@ -2,6 +2,7 @@ let database = null;
 let allItems = [];
 let selectedCode = null;
 let activeDiagnosticStepId = null;
+let recentCodes = [];
 
 const elements = {
   baseVersion: document.getElementById("baseVersion"),
@@ -12,11 +13,11 @@ const elements = {
   filterTipo: document.getElementById("filterTipo"),
   filterSistema: document.getElementById("filterSistema"),
   filterSeveridade: document.getElementById("filterSeveridade"),
-  filterStatus: document.getElementById("filterStatus"),
   clearFilters: document.getElementById("clearFilters"),
   cardsContainer: document.getElementById("cardsContainer"),
   detailContainer: document.getElementById("detailContainer"),
   resultCount: document.getElementById("resultCount"),
+  sortIndicator: document.querySelector(".panel-heading .mini-button"),
 };
 
 document.addEventListener("DOMContentLoaded", init);
@@ -30,15 +31,17 @@ async function init() {
     }
 
     database = await response.json();
-    allItems = database.itens || [];
+    recentCodes = [];
+    allItems = sortByCodeAsc(database.itens || []);
 
     renderMetadata();
     populateFilters();
     bindEvents();
-    renderList(allItems);
+    const initialItems = getCurrentFilteredItems();
+    renderList(initialItems);
 
-    if (allItems.length > 0) {
-      selectItem(allItems[0].codigo);
+    if (initialItems.length > 0) {
+      selectItem(initialItems[0].codigo, { trackRecent: false });
     }
   } catch (error) {
     showLoadError(error);
@@ -68,11 +71,6 @@ function populateFilters() {
   fillSelect(elements.filterTipo, listas.tipo || []);
   fillSelect(elements.filterSistema, listas.sistema || []);
   fillSelect(elements.filterSeveridade, listas.severidade || []);
-  fillSelect(elements.filterStatus, listas.status || []);
-
-  if ([...elements.filterStatus.options].some((opt) => opt.value === "Publicado")) {
-    elements.filterStatus.value = "Publicado";
-  }
 }
 
 function fillSelect(select, values) {
@@ -89,14 +87,12 @@ function bindEvents() {
   elements.filterTipo.addEventListener("change", applyFilters);
   elements.filterSistema.addEventListener("change", applyFilters);
   elements.filterSeveridade.addEventListener("change", applyFilters);
-  elements.filterStatus.addEventListener("change", applyFilters);
 
   elements.clearFilters.addEventListener("click", () => {
     elements.searchInput.value = "";
     elements.filterTipo.value = "";
     elements.filterSistema.value = "";
     elements.filterSeveridade.value = "";
-    elements.filterStatus.value = "";
     applyFilters();
   });
 
@@ -126,22 +122,71 @@ function getCurrentFilteredItems() {
   const tipo = elements.filterTipo.value;
   const sistema = elements.filterSistema.value;
   const severidade = elements.filterSeveridade.value;
-  const status = elements.filterStatus.value;
 
-  return allItems.filter((item) => {
+  const filtered = allItems.filter((item) => {
     const matchesText = !term || normalizeText(item.search_text || "").includes(term);
     const matchesTipo = !tipo || item.identificacao?.tipo === tipo;
     const matchesSistema = !sistema || item.identificacao?.sistema === sistema;
     const matchesSeveridade = !severidade || item.classificacao?.severidade === severidade;
-    const matchesStatus = !status || item.classificacao?.status === status;
 
-    return matchesText && matchesTipo && matchesSistema && matchesSeveridade && matchesStatus;
+    return matchesText && matchesTipo && matchesSistema && matchesSeveridade;
   });
+
+  return sortWithSessionRecents(filtered);
+}
+
+function getCodeNumber(code) {
+  const match = String(code || "").match(/\d+/);
+  return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
+}
+
+function compareByCodeAsc(a, b) {
+  const na = getCodeNumber(a.codigo);
+  const nb = getCodeNumber(b.codigo);
+
+  if (na !== nb) return na - nb;
+
+  return String(a.codigo || "").localeCompare(String(b.codigo || ""));
+}
+
+function sortByCodeAsc(items) {
+  return [...items].sort(compareByCodeAsc);
+}
+
+function sortWithSessionRecents(items) {
+  const base = sortByCodeAsc(items);
+
+  if (!recentCodes.length) return base;
+
+  return [...base].sort((a, b) => {
+    const ia = recentCodes.indexOf(a.codigo);
+    const ib = recentCodes.indexOf(b.codigo);
+    const ra = ia === -1 ? Number.MAX_SAFE_INTEGER : ia;
+    const rb = ib === -1 ? Number.MAX_SAFE_INTEGER : ib;
+
+    if (ra !== rb) return ra - rb;
+
+    return compareByCodeAsc(a, b);
+  });
+}
+
+function updateSortIndicator() {
+  if (!elements.sortIndicator) return;
+
+  const iconElement = document.createElement("span");
+  iconElement.className = "sort-icon";
+  iconElement.textContent = "≡";
+
+  const labelElement = document.createElement("span");
+  labelElement.textContent = "Mais recentes";
+
+  elements.sortIndicator.replaceChildren(iconElement, labelElement);
 }
 
 function renderList(items) {
   elements.cardsContainer.innerHTML = "";
   elements.resultCount.textContent = `${items.length} item(ns) encontrado(s)`;
+  updateSortIndicator();
 
   if (items.length === 0) {
     elements.cardsContainer.innerHTML = `
@@ -192,13 +237,17 @@ function renderList(items) {
   });
 }
 
-function selectItem(code) {
+function selectItem(code, options = {}) {
   selectedCode = code;
   const item = allItems.find((entry) => entry.codigo === code);
 
   if (!item) {
     renderEmptyDetail();
     return;
+  }
+
+  if (options.trackRecent !== false) {
+    recentCodes = [code, ...recentCodes.filter((recentCode) => recentCode !== code)].slice(0, 10);
   }
 
   const steps = getNormalizedSteps(item);
@@ -232,8 +281,6 @@ function renderDetail(item) {
         <h2>${safe(item.codigo)} — ${safe(item.conteudo?.mensagem_ihm_alerta)}</h2>
         <p>${safe(item.conteudo?.descricao_resumida)}</p>
       </div>
-
-      <button class="favorite-button" type="button">☆ Marcar como favorito</button>
     </div>
 
     <div class="info-strip">
@@ -287,7 +334,6 @@ function renderDetail(item) {
 
         ${renderCumminsTroubleshooting(item)}
         ${renderAttachments(item.anexos || [])}
-        ${renderRevisions(item.revisoes || [])}
       </div>
     </div>
   `;
@@ -573,30 +619,6 @@ function renderAttachmentRow(attachment) {
           : `<span class="attachment-open-button disabled" title="Arquivo não informado" aria-label="Arquivo não informado">↗</span>`}
       </td>
     </tr>
-  `;
-}
-
-function renderRevisions(revisions) {
-  if (!revisions.length) {
-    return `
-      <section class="revision-section">
-        <h3 class="section-title">${icon("history")} Revisões</h3>
-        <p>Nenhuma revisão cadastrada.</p>
-      </section>
-    `;
-  }
-
-  return `
-    <section class="revision-section">
-      <h3 class="section-title">${icon("history")} Revisões</h3>
-      ${revisions.map((revision) => `
-        <div class="revision-row">
-          <strong>${safe(revision.versao)} — ${formatDateShort(revision.data)}</strong>
-          <p>${safe(revision.descricao)}</p>
-          <small>Responsável: ${safe(revision.responsavel)} | Status: ${safe(revision.status_publicacao)}</small>
-        </div>
-      `).join("")}
-    </section>
   `;
 }
 
