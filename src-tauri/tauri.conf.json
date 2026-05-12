@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Troubleshooting Wolf",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "identifier": "br.com.wolf.telemetria.troubleshooting",
   "build": {
     "frontendDist": "../dist",
@@ -14,10 +14,13 @@
     "windows": [
       {
         "title": "Troubleshooting",
-        "width": 800,
-        "height": 600,
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1200,
+        "minHeight": 760,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "maximized": true
       }
     ],
     "security": {

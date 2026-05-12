@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 const PROTECTED_DATABASE: &[u8] = include_bytes!("../resources/troubleshooting_base.dat");
 
 const KEY: [u8; 32] = [
