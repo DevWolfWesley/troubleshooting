@@ -7,9 +7,10 @@
     "frontendDist": "../dist",
     "devUrl": "http://127.0.0.1:5173",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeBuildCommand": "npm run build:secure"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Troubleshooting",
@@ -33,6 +34,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "resources": [
+    "../dist/dados_troubleshooting.json"
+  ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
