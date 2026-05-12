@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Wolf Troubleshooting</title>
+
+  <link rel="stylesheet" crossorigin href="./assets/index-Cez7aOiP.css">
+</head>
+
+<body>
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-area">
+        <div class="logo-card">
+          <img
+            src="./assets/logo-wolf-BLlZi_8J.png"
+            alt="Wolf Equipamentos"
+            class="wolf-logo"
+            onerror="this.style.display='none'; this.parentElement.classList.add('logo-missing');"
+          />
+          <div class="logo-fallback">
+            <span>WOLF</span>
+          </div>
+        </div>
+
+        <div class="header-divider"></div>
+
+        <div class="title-area">
+          <h1>Troubleshooting de Alertas e Falhas</h1>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <div>
+          <span>Versão da base</span>
+          <strong id="baseVersion">--</strong>
+        </div>
+
+        <div class="status-separator"></div>
+
+        <div>
+          <span>Base</span>
+          <strong id="baseDate">--</strong>
+        </div>
+
+        <div class="status-separator"></div>
+
+        <div class="offline-pill">
+          <span class="database-icon"></span>
+          <strong>Offline</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="toolbar-panel">
+        <div class="search-field">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35m1.35-5.15a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"/></svg>
+          </span>
+
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Digite código, falha, causa, variável, sistema..."
+            autocomplete="off"
+          />
+
+          <kbd>/</kbd>
+        </div>
+
+        <div class="filters-grid">
+          <label>
+            <span>Tipo</span>
+            <select id="filterTipo">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sistema</span>
+            <select id="filterSistema">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Severidade</span>
+            <select id="filterSeveridade">
+              <option value="">Todas</option>
+            </select>
+          </label>
+
+          <button class="clear-button" id="clearFilters" type="button">
+            <span>⟳</span>
+            Limpar filtros
+          </button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="list-panel glass-panel">
+          <div class="panel-heading">
+            <div class="heading-with-icon">
+              <span class="pulse-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+              </span>
+              <div>
+                <h2>Alertas e Falhas</h2>
+                <p id="resultCount">Carregando itens...</p>
+              </div>
+            </div>
+
+            <button class="mini-button" type="button" title="Ordenação atual">
+              <span class="sort-icon">≡</span>
+              <span>Mais recentes</span>
+            </button>
+          </div>
+
+          <div id="cardsContainer" class="cards-container"></div>
+        </aside>
+
+        <section class="detail-panel glass-panel">
+          <div id="detailContainer" class="detail-empty">
+            <div class="empty-orb"></div>
+            <h2>Selecione um item</h2>
+            <p>
+              Clique em uma falha ou alerta na lista para visualizar causa,
+              efeito, solução, diagnóstico guiado, anexos e revisões.
+            </p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div>
+        <img src="./assets/logo-wolf-BLlZi_8J.png" alt="Wolf Equipamentos" class="footer-logo" />
+        <span>Força em cada impacto!</span>
+      </div>
+
+      <div class="footer-company-info">
+        <span>Wolf 2025 © Todos os Direitos Reservados</span>
+        <span>Rodovia Engº Ermênio de Oliveira Penteado Km 54,5 - Itaici - Indaiatuba/SP - CEP: 13340-600</span>
+      </div>
+
+      <div class="machine-lineart" aria-hidden="true">
+        <svg viewBox="0 0 360 150" role="img">
+          <!-- mastro / torre -->
+          <path d="M54 18v104" />
+          <path d="M44 18h22v14H44z" />
+          <path d="M47 42h14" />
+          <path d="M47 64h14" />
+          <path d="M47 86h14" />
+          <path d="M43 122h24" />
+
+          <!-- martelo / haste -->
+          <path d="M54 122v16" />
+          <path d="M47 138h14" />
+          <path d="M54 138l-5 8" />
+          <path d="M54 138l5 8" />
+
+          <!-- articulação e lança -->
+          <path d="M63 96l42-20" />
+          <path d="M72 104l48-18" />
+          <path d="M105 76l94 18" />
+          <path d="M120 86l76 18" />
+          <path d="M84 92a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+
+          <!-- corpo / cabine -->
+          <path d="M202 62h70l18 18v38H202z" />
+          <path d="M215 72h28v30h-28z" />
+          <path d="M252 72h22l8 10v20h-30z" />
+          <path d="M202 62l14-13h58l-2 13" />
+
+          <!-- tampa traseira / motor -->
+          <path d="M290 78h42v40h-42z" />
+          <path d="M300 88h22" />
+          <path d="M300 98h22" />
+          <path d="M300 108h22" />
+
+          <!-- esteira -->
+          <path d="M178 121h124l18 10-12 12H188l-22-10z" />
+          <path d="M190 132h110" />
+          <path d="M190 132a11 11 0 1 0 22 0a11 11 0 1 0-22 0" />
+          <path d="M278 132a11 11 0 1 0 22 0a11 11 0 1 0-22 0" />
+          <path d="M222 135h38" />
+
+          <!-- detalhes -->
+          <path d="M235 49h12" />
+          <path d="M241 49v-9" />
+          <path d="M310 78l22-12" />
+        </svg>
+      </div>
+    </footer>
+  </div>
+
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>
