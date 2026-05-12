@@ -6,10 +6,6 @@ const publicDir = path.join(webDir, "public");
 
 const filesToCopy = [
   {
-    from: path.join(webDir, "dados_troubleshooting.json"),
-    to: path.join(publicDir, "dados_troubleshooting.json")
-  },
-  {
     from: path.join(webDir, "assets", "js", "app.js"),
     to: path.join(publicDir, "assets", "js", "app.js")
   }
@@ -28,6 +24,16 @@ function copyFile(from, to) {
   fs.copyFileSync(from, to);
   console.log(`Copiado: ${from} -> ${to}`);
 }
+
+function removeFileIfExists(filePath) {
+  if (fs.existsSync(filePath)) {
+    fs.rmSync(filePath, { force: true });
+    console.log(`Removido: ${filePath}`);
+  }
+}
+
+// Remove JSON aberto da pasta public para ele não ir para o dist.
+removeFileIfExists(path.join(publicDir, "dados_troubleshooting.json"));
 
 for (const file of filesToCopy) {
   copyFile(file.from, file.to);

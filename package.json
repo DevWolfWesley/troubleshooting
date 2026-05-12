@@ -1,12 +1,14 @@
 {
   "name": "telemetria-troubleshooting",
   "version": "0.1.0",
+  "type": "module",
   "description": "Aplicativo offline de troubleshooting",
   "main": "index.js",
   "scripts": {
     "dev": "node prepare-public.js && vite",
     "build": "node prepare-public.js && vite build",
     "build:secure": "node prepare-public.js && vite build && node obfuscate-dist.js",
+    "protect:base": "node protect-database.js",
     "tauri": "tauri"
   },
   "keywords": [],
